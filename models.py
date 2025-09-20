@@ -12,11 +12,12 @@ class Todo(Base) :
     title = Column(String(255))
     description = Column(String(255) , nullable=True)
     priority = Column(Integer)
+    complete = Column(Boolean , default=False)
     
 class TodoBase(BaseModel):
-    title:str 
-    description:str |None = None
-    priority:int 
+    title:str = Field(min_length=3 , max_length=255)
+    description:str |None = Field(None, min_length=3 , max_length=255 )
+    priority:int = Field(ge=1 , le=5)
     complete:bool = False 
 class TodoRead(TodoBase) :
     id :int 

@@ -4,7 +4,7 @@ from fastapi import Depends, FastAPI, HTTPException, Path, status
 from sqlalchemy.orm import Session
 
 from database import Base, SessionLocal, engine  # type: ignore
-from models import Todo, TodoRead  # type: ignore
+from models import Todo, TodoCreate, TodoRead  # type: ignore
 
 Base.metadata.create_all(bind=engine)
 
@@ -23,8 +23,8 @@ db_dependency = Annotated[Session , Depends(get_db)]
 async def home() :
     return {"message": "hello from FastAPI"}
 
-@app.get('/todos' , status_code=status.HTTP_200_OK) 
-async def all_todos(db:db_dependency) :
+@app.get('/todos' , status_code=status.HTTP_200_OK , response_model=list[TodoRead]) 
+async def all_todos(db:db_dependency):
     return db.query(Todo).all()
 
 @app.get('/todos/{todo_id}' , status_code=status.HTTP_200_OK , response_model=TodoRead)
@@ -33,3 +33,12 @@ async def get_todo(db:db_dependency , todo_id:Annotated[int , Path(ge=1 , descri
     if todo is None :
         raise HTTPException(status_code=404 , detail=f"No todo with id: {todo_id} exist")
     return todo
+
+@app.post('/todos' , response_model=TodoRead , status_code=status.HTTP_201_CREATED) 
+async def create_todo(db:db_dependency, todo_request:TodoCreate) :
+    todo = Todo(**todo_request.model_dump())
+    db.add(todo)
+    db.commit()
+    db.refresh(todo)
+    return todo
+    
