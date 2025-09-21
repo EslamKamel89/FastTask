@@ -41,4 +41,21 @@ async def create_todo(db:db_dependency, todo_request:TodoCreate) :
     db.commit()
     db.refresh(todo)
     return todo
+
+@app.put('/todos/{todo_id}' , response_model=TodoRead  , status_code=status.HTTP_201_CREATED) 
+async def update_todo(
+    db:db_dependency  , 
+    todo_id :Annotated[int , Path(ge=1,description='todo id must be >= 1')] , 
+    todo_request:TodoCreate
+    ) :
+    todo_model = db.query(Todo).filter(Todo.id == todo_id).first()
+    if todo_model is None :
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail=f'No todo with this {id} exist')
+    todo_model.title = todo_request.title # type: ignore
+    todo_model.description = todo_request.description  # type: ignore
+    todo_model.priority = todo_request.priority # type: ignore
+    todo_model.complete = todo_request.complete # type: ignore
+    db.add(todo_model)
+    db.commit()
+    return todo_model
     
