@@ -67,6 +67,7 @@ async def delete_todo(
     todo_model = db.query(Todo).filter(Todo.id == todo_id).first()
     if todo_model is None :
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail=f"No todo with this id: {todo_id} exist")
-    db.query(Todo).filter(Todo.id == todo_id).delete() 
+    # db.query(Todo).filter(Todo.id == todo_id).delete() 
+    db.delete(todo_model)
     db.commit()
     return 
