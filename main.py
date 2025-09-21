@@ -58,4 +58,15 @@ async def update_todo(
     db.add(todo_model)
     db.commit()
     return todo_model
-    
+
+@app.delete('/todos/{todo_id}' , status_code=status.HTTP_204_NO_CONTENT)
+async def delete_todo(
+    db:db_dependency , 
+    todo_id: Annotated[int , Path(ge=1 , description='todo id must be >= 1')]
+    ):
+    todo_model = db.query(Todo).filter(Todo.id == todo_id).first()
+    if todo_model is None :
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail=f"No todo with this id: {todo_id} exist")
+    db.query(Todo).filter(Todo.id == todo_id).delete() 
+    db.commit()
+    return 
