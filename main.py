@@ -5,9 +5,11 @@ from sqlalchemy.orm import Session
 
 from database import Base, SessionLocal, engine  # type: ignore
 from models import Todo, TodoCreate, TodoRead  # type: ignore
+from routers import auth
 
+app = FastAPI()
 Base.metadata.create_all(bind=engine)
-
+app.include_router(auth.router)
 def get_db():
     db = SessionLocal()
     try:
@@ -16,7 +18,6 @@ def get_db():
         db.close()
 
 
-app = FastAPI()
 db_dependency = Annotated[Session , Depends(get_db)]
 
 @app.get('/')
