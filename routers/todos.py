@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import Todo, TodoCreate, TodoRead
 
-router = APIRouter() 
+router = APIRouter(prefix='/todos' , tags=['todos']) 
 def get_db():
     db = SessionLocal()
     try:
@@ -17,22 +17,20 @@ def get_db():
 db_dependency = Annotated[Session , Depends(get_db)]
 
 
-@router.get('/')
-async def home() :
-    return {"message": "hello from FastAPI"}
 
-@router.get('/todos' , status_code=status.HTTP_200_OK , response_model=list[TodoRead]) 
+
+@router.get('/' , status_code=status.HTTP_200_OK , response_model=list[TodoRead]) 
 async def all_todos(db:db_dependency):
     return db.query(Todo).all()
 
-@router.get('/todos/{todo_id}' , status_code=status.HTTP_200_OK , response_model=TodoRead)
+@router.get('/{todo_id}' , status_code=status.HTTP_200_OK , response_model=TodoRead)
 async def get_todo(db:db_dependency , todo_id:Annotated[int , Path(ge=1 , description='todo id >= 1')]) : 
     todo = db.query(Todo).filter(Todo.id==todo_id).first()
     if todo is None :
         raise HTTPException(status_code=404 , detail=f"No todo with id: {todo_id} exist")
     return todo
 
-@router.post('/todos' , response_model=TodoRead , status_code=status.HTTP_201_CREATED) 
+@router.post('/' , response_model=TodoRead , status_code=status.HTTP_201_CREATED) 
 async def create_todo(db:db_dependency, todo_request:TodoCreate) :
     todo = Todo(**todo_request.model_dump())
     db.add(todo)
@@ -40,7 +38,7 @@ async def create_todo(db:db_dependency, todo_request:TodoCreate) :
     db.refresh(todo)
     return todo
 
-@router.put('/todos/{todo_id}' , response_model=TodoRead  , status_code=status.HTTP_201_CREATED) 
+@router.put('/{todo_id}' , response_model=TodoRead  , status_code=status.HTTP_201_CREATED) 
 async def update_todo(
     db:db_dependency  , 
     todo_id :Annotated[int , Path(ge=1,description='todo id must be >= 1')] , 
@@ -57,7 +55,7 @@ async def update_todo(
     db.commit()
     return todo_model
 
-@router.delete('/todos/{todo_id}' , status_code=status.HTTP_204_NO_CONTENT)
+@router.delete('/{todo_id}' , status_code=status.HTTP_204_NO_CONTENT)
 async def delete_todo(
     db:db_dependency , 
     todo_id: Annotated[int , Path(ge=1 , description='todo id must be >= 1')]
