@@ -20,8 +20,7 @@ class User(Base) :
 
 class UserBase(BaseModel) :
     username:str = Field(min_length=3 , max_length=255)
-    email:str = Field(min_length=3 , max_length=255)
-    password:str = Field(min_length=3 , max_length=255)
+    email:str = Field(min_length=3 , max_length=255 )
     first_name:str = Field(min_length=3 , max_length=255)
     last_name:str = Field(min_length=3 , max_length=255)
     is_active:bool = False
@@ -32,6 +31,7 @@ class UserRead(UserBase) :
     model_config = ConfigDict(from_attributes=True)
 
 class UserCreate(UserBase) :
+    password:str = Field(min_length=3 , max_length=255)
     pass
 class Todo(Base) :
     __tablename__ = 'todos'
