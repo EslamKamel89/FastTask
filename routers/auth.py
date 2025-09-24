@@ -1,6 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
+from fastapi.security import OAuth2PasswordRequestForm
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
@@ -33,3 +34,22 @@ async def create_user(db:db_dependency , user_request:UserCreate) :
     db.commit()
     db.refresh(user)
     return user
+
+
+
+@router.post('/token'  , status_code=status.HTTP_200_OK) 
+async def login_for_access_token(
+    db:db_dependency, 
+    form_data:Annotated[OAuth2PasswordRequestForm , Depends()],):
+    user = authenticate_user(form_data.username , form_data.password, db)
+    if not user :
+        return 'Failed authentication'
+    return 'Successful authentication'
+
+def authenticate_user(username:str , password:str , db:Session):
+    user = db.query(User).filter(User.username == username).first()
+    if user is None :
+        return False 
+    if not bcrypt_context.verify(password , user.hashed_password) : # type: ignore
+        return False 
+    return True
