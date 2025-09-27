@@ -25,8 +25,7 @@ def get_db():
     finally:
         db.close()
 db_dependency = Annotated[Session, Depends(get_db)]
-oauth2_bearer = OAuth2AuthorizationCodeBearer(authorizationUrl='token-auth',tokenUrl='token')
-
+oauth2_bearer = OAuth2AuthorizationCodeBearer(authorizationUrl='token-auth',tokenUrl='auth/token')
 @router.post('/' , status_code=status.HTTP_201_CREATED , response_model=UserRead )
 async def create_user(db:db_dependency , user_request:UserCreate) :
     user = User(
@@ -53,7 +52,7 @@ async def login_for_access_token(
     form_data:Annotated[OAuth2PasswordRequestForm , Depends()],):
     user = authenticate_user(form_data.username , form_data.password, db)
     if not user :
-        return 'Failed authentication'
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED , detail="could not validate user")
     token = create_access_token(user.username , user.id , timedelta(minutes=20)) # type: ignore
     return {
         "access_token" : token , 
