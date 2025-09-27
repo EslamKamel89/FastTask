@@ -2,8 +2,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import (OAuth2AuthorizationCodeBearer,
-                              OAuth2PasswordRequestForm)
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
@@ -25,7 +24,7 @@ def get_db():
     finally:
         db.close()
 db_dependency = Annotated[Session, Depends(get_db)]
-oauth2_bearer = OAuth2AuthorizationCodeBearer(authorizationUrl='token-auth',tokenUrl='auth/token')
+oauth2_bearer = OAuth2PasswordBearer(tokenUrl='/auth/token')
 @router.post('/' , status_code=status.HTTP_201_CREATED , response_model=UserRead )
 async def create_user(db:db_dependency , user_request:UserCreate) :
     user = User(
@@ -81,7 +80,7 @@ async def get_current_user(token : Annotated[str , Depends(oauth2_bearer)]) ->di
         user_id:int|None = payload.get('id')
         if username is None or user_id is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED , detail="could not validate user")
-        return {"username":username , 'user_id' : id}
+        return {"username":username , 'user_id' : user_id}
     except JWTError as e: # type: ignore
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED , detail="could not validate user")
     
