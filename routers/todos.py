@@ -24,8 +24,9 @@ user_dependency = Annotated[CurrentUser, Depends(get_current_user)]
 
 
 @router.get('/' , status_code=status.HTTP_200_OK , response_model=list[TodoRead]) 
-async def all_todos(db:db_dependency):
-    return db.query(Todo).all()
+async def all_todos(user: user_dependency , db:db_dependency):
+    todos = db.query(Todo).where(Todo.owner_id == user.user_id).all()
+    return todos
 
 @router.get('/{todo_id}' , status_code=status.HTTP_200_OK , response_model=TodoRead)
 async def get_todo(db:db_dependency , todo_id:Annotated[int , Path(ge=1 , description='todo id >= 1')]) : 
