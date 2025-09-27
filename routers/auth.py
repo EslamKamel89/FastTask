@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from database import SessionLocal
-from models import User, UserCreate, UserRead  # type: ignore
+from models import User, UserCreate, UserRead
 
 bcrypt_context = CryptContext(schemes=['bcrypt']  )
 
@@ -73,14 +73,18 @@ def create_access_token(username:str , user_id:int , expires_delta:timedelta) ->
     encode.update({'exp' : expires})
     return jwt.encode(encode , SECRET_KEY , algorithm=ALGORITHM)
 
-async def get_current_user(token : Annotated[str , Depends(oauth2_bearer)]) ->dict[str, Any] : 
+class CurrentUser(BaseModel):
+    username:str 
+    user_id:int
+    
+async def get_current_user(token : Annotated[str , Depends(oauth2_bearer)]) ->CurrentUser : 
     try:
         payload = jwt.decode(token , SECRET_KEY , algorithms=[ALGORITHM])
         username:str|None = payload.get('sub')
         user_id:int|None = payload.get('id')
         if username is None or user_id is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED , detail="could not validate user")
-        return {"username":username , 'user_id' : user_id}
+        return CurrentUser(username=username , user_id=user_id)
     except JWTError as e: # type: ignore
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED , detail="could not validate user")
     

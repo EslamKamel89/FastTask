@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import Todo, TodoCreate, TodoRead
 
-from .auth import get_current_user
+from .auth import CurrentUser, get_current_user
 
 router = APIRouter(prefix='/todos' , tags=['todos']) 
 def get_db():
@@ -17,7 +17,9 @@ def get_db():
         db.close()
 
 db_dependency = Annotated[Session , Depends(get_db)]
-user_dependency = Annotated[dict[str, any] , Depends(get_current_user)]
+
+    
+user_dependency = Annotated[CurrentUser, Depends(get_current_user)]
 
 
 
@@ -35,8 +37,8 @@ async def get_todo(db:db_dependency , todo_id:Annotated[int , Path(ge=1 , descri
 @router.post('/' , response_model=TodoRead , status_code=status.HTTP_201_CREATED) 
 async def create_todo(user : user_dependency ,  db:db_dependency, todo_request:TodoCreate) :
     if user is None : # type: ignore
-        raise HTTPException(status_code=422 , detail='Authentication failed')
-    todo = Todo(**todo_request.model_dump() , owner_id=user['user_id'])
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED , detail='Authentication failed')
+    todo = Todo(**todo_request.model_dump() , owner_id=user.user_id)
     db.add(todo)
     db.commit()
     db.refresh(todo)
