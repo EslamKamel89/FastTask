@@ -52,7 +52,7 @@ async def login_for_access_token(
     user = authenticate_user(form_data.username , form_data.password, db)
     if not user :
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED , detail="could not validate user")
-    token = create_access_token(user.username , user.id , timedelta(minutes=20)) # type: ignore
+    token = create_access_token(user.username , user.id , user.role , timedelta(minutes=20)) # type: ignore
     return {
         "access_token" : token , 
         "token_type" : "bearer"
@@ -67,8 +67,8 @@ def authenticate_user(username:str , password:str , db:Session):
     return user
 
 
-def create_access_token(username:str , user_id:int , expires_delta:timedelta) -> str:
-    encode : dict[str, Any] = {"sub":username , 'id':user_id}
+def create_access_token(username:str , user_id:int , role:str , expires_delta:timedelta) -> str:
+    encode : dict[str, Any] = {"sub":username , 'id':user_id , "role":role}
     expires = datetime.now(timezone.utc) + expires_delta
     encode.update({'exp' : expires})
     return jwt.encode(encode , SECRET_KEY , algorithm=ALGORITHM)
@@ -76,15 +76,17 @@ def create_access_token(username:str , user_id:int , expires_delta:timedelta) ->
 class CurrentUser(BaseModel):
     username:str 
     user_id:int
+    role:str
     
 async def get_current_user(token : Annotated[str , Depends(oauth2_bearer)]) ->CurrentUser : 
     try:
         payload = jwt.decode(token , SECRET_KEY , algorithms=[ALGORITHM])
         username:str|None = payload.get('sub')
         user_id:int|None = payload.get('id')
-        if username is None or user_id is None:
+        role:str|None = payload.get('role')
+        if username is None or user_id is None or role is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED , detail="could not validate user")
-        return CurrentUser(username=username , user_id=user_id)
+        return CurrentUser(username=username , user_id=user_id , role= role)
     except JWTError as e: # type: ignore
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED , detail="could not validate user")
     
