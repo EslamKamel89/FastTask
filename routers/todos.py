@@ -52,11 +52,12 @@ async def create_todo(user : user_dependency ,  db:db_dependency, todo_request:T
 
 @router.put('/{todo_id}' , response_model=TodoRead  , status_code=status.HTTP_201_CREATED) 
 async def update_todo(
+    user:user_dependency , 
     db:db_dependency  , 
     todo_id :Annotated[int , Path(ge=1,description='todo id must be >= 1')] , 
     todo_request:TodoCreate
     ) :
-    todo_model = db.query(Todo).filter(Todo.id == todo_id).first()
+    todo_model = db.query(Todo).filter(Todo.id == todo_id , Todo.owner_id == user.user_id ).first()
     if todo_model is None :
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail=f'No todo with this {id} exist')
     todo_model.title = todo_request.title # type: ignore
