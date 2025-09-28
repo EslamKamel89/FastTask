@@ -59,11 +59,9 @@ async def update_todo(
     ) :
     todo_model = db.query(Todo).filter(Todo.id == todo_id , Todo.owner_id == user.user_id ).first()
     if todo_model is None :
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail=f'No todo with this {id} exist')
-    todo_model.title = todo_request.title # type: ignore
-    todo_model.description = todo_request.description  # type: ignore
-    todo_model.priority = todo_request.priority # type: ignore
-    todo_model.complete = todo_request.complete # type: ignore
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail=f'No todo with this {todo_id} exist')
+    for key ,value in todo_request.model_dump().items() :
+        setattr(todo_model , key , value)
     db.add(todo_model)
     db.commit()
     return todo_model
