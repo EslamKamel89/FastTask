@@ -19,29 +19,29 @@ def get_db():
 
 db_dependency = Annotated[Session , Depends(get_db)]
 
-    
-user_dependency = Annotated[CurrentUser, Depends(get_current_user)]
+def admin_required(user: CurrentUser = Depends(get_current_user)) ->CurrentUser :
+    if user.role != 'admin' :
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin only")
+    return user
+
+admin_dependency = Annotated[CurrentUser, Depends(admin_required)]
 
 @router.get('/todos' , status_code=status.HTTP_200_OK , response_model=list[TodoRead]) 
 async def all_todos(
-    user: user_dependency , 
+    admin: admin_dependency , 
     db: db_dependency , 
-    ):
-    if user.role == 'admin':
-        return db.query(Todo).all()
-    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED , detail="Authentication Failed")
+    ):  
+    return db.query(Todo).all()
 
 @router.delete('/todos/{todo_id}' , status_code=status.HTTP_204_NO_CONTENT )
 async def delete_todo(
-    user : user_dependency , 
+    admin : admin_dependency , 
     db: db_dependency , 
     todo_id : Annotated[int , Path(ge=1 , description='todo id must be >=1')]
     ):
-    if user.role == 'admin' : 
-        todo = db.query(Todo).filter(Todo.id == todo_id).first()
-        if todo is None :
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail='Todo not found')
-        db.delete(todo)
-        db.commit()
-        return Response(status_code=status.HTTP_204_NO_CONTENT)
-    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED , detail='You are not authorized')
+    todo = db.query(Todo).filter(Todo.id == todo_id).first()
+    if todo is None :
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail='Todo not found')
+    db.delete(todo)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
