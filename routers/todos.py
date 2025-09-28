@@ -25,12 +25,17 @@ user_dependency = Annotated[CurrentUser, Depends(get_current_user)]
 
 @router.get('/' , status_code=status.HTTP_200_OK , response_model=list[TodoRead]) 
 async def all_todos(user: user_dependency , db:db_dependency):
+    if user is None : # type: ignore
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED , detail='Authentication failed')
     todos = db.query(Todo).where(Todo.owner_id == user.user_id).all()
     return todos
 
 @router.get('/{todo_id}' , status_code=status.HTTP_200_OK , response_model=TodoRead)
-async def get_todo(db:db_dependency , todo_id:Annotated[int , Path(ge=1 , description='todo id >= 1')]) : 
-    todo = db.query(Todo).filter(Todo.id==todo_id).first()
+async def get_todo(user:user_dependency ,  db:db_dependency , todo_id:Annotated[int , Path(ge=1 , description='todo id >= 1')]) : 
+    if user is None : # type: ignore
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED , detail='Authentication failed')
+    todo = db.query(Todo).filter(Todo.id==todo_id)\
+            .filter(Todo.owner_id == user.user_id).first()
     if todo is None :
         raise HTTPException(status_code=404 , detail=f"No todo with id: {todo_id} exist")
     return todo
