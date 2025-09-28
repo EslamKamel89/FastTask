@@ -1,6 +1,7 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Path, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Response, status
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from database import SessionLocal
@@ -66,7 +67,9 @@ async def update_todo(
     db.commit()
     return todo_model
 
-@router.delete('/{todo_id}' , status_code=status.HTTP_204_NO_CONTENT)
+@router.delete('/{todo_id}' ,
+               status_code=status.HTTP_204_NO_CONTENT ,
+               summary='Delete a todo you own')
 async def delete_todo(
     user: user_dependency , 
     db:db_dependency , 
@@ -75,6 +78,9 @@ async def delete_todo(
     todo_model = db.query(Todo).filter(Todo.id == todo_id).filter(Todo.owner_id == user.user_id).first()
     if todo_model is None :
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail=f"No todo with this id: {todo_id} exist")
-    db.delete(todo_model)
-    db.commit()
-    return 
+    try:
+        db.delete(todo_model)
+        db.commit()
+    except  SQLAlchemyError:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR , detail=f"Could not delete todo")
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
