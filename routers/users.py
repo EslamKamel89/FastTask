@@ -1,24 +1,12 @@
-from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
-from passlib.context import CryptContext
+from fastapi import APIRouter, HTTPException, Response, status
 from pydantic import BaseModel, Field
-from sqlalchemy.orm import Session
 
-from database import SessionLocal
 from models import User, UserRead
-from security import CurrentUser, get_current_user
+from security import db_dependency, user_dependency
 
 router = APIRouter(prefix='/users' , tags=['users'])
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-db_dependency = Annotated[Session , Depends(get_db)]
-user_dependency= Annotated[CurrentUser , Depends(get_current_user)]
-bcrypt_context= CryptContext(schemes=['bcrypt'])
+
 
 @router.get('/' , status_code=status.HTTP_200_OK , response_model=UserRead) 
 async def get_user(

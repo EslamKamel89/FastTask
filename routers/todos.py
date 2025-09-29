@@ -1,26 +1,12 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Response, status
+from fastapi import APIRouter, HTTPException, Path, Response, status
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
 
-from database import SessionLocal
 from models import Todo, TodoCreate, TodoRead
-from security import CurrentUser, get_current_user
+from security import db_dependency, user_dependency
 
 router = APIRouter(prefix='/todos' , tags=['todos']) 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally :
-        db.close()
-
-db_dependency = Annotated[Session , Depends(get_db)]
-
-    
-user_dependency = Annotated[CurrentUser, Depends(get_current_user)]
-
 
 
 @router.get('/' , status_code=status.HTTP_200_OK , response_model=list[TodoRead]) 

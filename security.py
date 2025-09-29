@@ -43,8 +43,15 @@ def create_access_token(username:str , user_id:int , role:str , expires_delta:ti
     encode.update({'exp' : expires})
     return jwt.encode(encode , SECRET_KEY , algorithm=ALGORITHM)
 
+def admin_required(user: CurrentUser = Depends(get_current_user)) ->CurrentUser :
+    if user.role != 'admin' :
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin only")
+    return user
+
+
 
 db_dependency = Annotated[Session , Depends(get_db)]
 user_dependency= Annotated[CurrentUser , Depends(get_current_user)]
 bcrypt_context= CryptContext(schemes=['bcrypt'])
+admin_dependency = Annotated[CurrentUser, Depends(admin_required)]
 

@@ -6,18 +6,11 @@ from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from database import SessionLocal
 from models import User, UserCreate, UserRead
-from security import bcrypt_context, create_access_token
+from security import bcrypt_context, create_access_token, db_dependency
 
 router = APIRouter(prefix='/auth' , tags=['auth'])
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-db_dependency = Annotated[Session, Depends(get_db)]
+
 @router.post('/' , status_code=status.HTTP_201_CREATED , response_model=UserRead )
 async def create_user(db:db_dependency , user_request:UserCreate) :
     user = User(

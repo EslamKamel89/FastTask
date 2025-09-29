@@ -1,28 +1,13 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Response, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException, Path, Response, status
 
-from database import SessionLocal
 from models import Todo, TodoRead
-from security import CurrentUser, get_current_user
+from security import admin_dependency, db_dependency
 
 router = APIRouter(prefix='/admin' , tags=['admin']) 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally :
-        db.close()
 
-db_dependency = Annotated[Session , Depends(get_db)]
 
-def admin_required(user: CurrentUser = Depends(get_current_user)) ->CurrentUser :
-    if user.role != 'admin' :
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin only")
-    return user
-
-admin_dependency = Annotated[CurrentUser, Depends(admin_required)]
 
 @router.get('/todos' , status_code=status.HTTP_200_OK , response_model=list[TodoRead]) 
 async def all_todos(
