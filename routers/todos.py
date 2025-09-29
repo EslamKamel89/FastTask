@@ -6,8 +6,7 @@ from sqlalchemy.orm import Session
 
 from database import SessionLocal
 from models import Todo, TodoCreate, TodoRead
-
-from .auth import CurrentUser, get_current_user
+from security import CurrentUser, get_current_user
 
 router = APIRouter(prefix='/todos' , tags=['todos']) 
 def get_db():

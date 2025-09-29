@@ -1,13 +1,11 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Response, status
-from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from database import SessionLocal
-from models import Todo, TodoCreate, TodoRead
-
-from .auth import CurrentUser, get_current_user
+from models import Todo, TodoRead
+from security import CurrentUser, get_current_user
 
 router = APIRouter(prefix='/admin' , tags=['admin']) 
 def get_db():

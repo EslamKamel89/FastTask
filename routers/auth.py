@@ -1,20 +1,14 @@
-from datetime import datetime, timedelta, timezone
-from typing import Annotated, Any
+from datetime import timedelta
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import JWTError, jwt
-from passlib.context import CryptContext
+from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from database import SessionLocal
 from models import User, UserCreate, UserRead
-
-bcrypt_context = CryptContext(schemes=['bcrypt']  )
-
-SECRET_KEY = "289901b501c0dd3321d9972705d6015777892668d71b7983d72f3926d00d0ab1"
-ALGORITHM = "HS256"
+from security import bcrypt_context, create_access_token
 
 router = APIRouter(prefix='/auth' , tags=['auth'])
 def get_db():
@@ -24,7 +18,6 @@ def get_db():
     finally:
         db.close()
 db_dependency = Annotated[Session, Depends(get_db)]
-oauth2_bearer = OAuth2PasswordBearer(tokenUrl='/auth/token')
 @router.post('/' , status_code=status.HTTP_201_CREATED , response_model=UserRead )
 async def create_user(db:db_dependency , user_request:UserCreate) :
     user = User(
@@ -67,27 +60,8 @@ def authenticate_user(username:str , password:str , db:Session):
     return user
 
 
-def create_access_token(username:str , user_id:int , role:str , expires_delta:timedelta) -> str:
-    encode : dict[str, Any] = {"sub":username , 'id':user_id , "role":role}
-    expires = datetime.now(timezone.utc) + expires_delta
-    encode.update({'exp' : expires})
-    return jwt.encode(encode , SECRET_KEY , algorithm=ALGORITHM)
 
-class CurrentUser(BaseModel):
-    username:str 
-    user_id:int
-    role:str
+
     
-async def get_current_user(token : Annotated[str , Depends(oauth2_bearer)]) ->CurrentUser : 
-    try:
-        payload = jwt.decode(token , SECRET_KEY , algorithms=[ALGORITHM])
-        username:str|None = payload.get('sub')
-        user_id:int|None = payload.get('id')
-        role:str|None = payload.get('role')
-        if username is None or user_id is None or role is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED , detail="could not validate user")
-        return CurrentUser(username=username , user_id=user_id , role= role)
-    except JWTError as e: # type: ignore
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED , detail="could not validate user")
-    
+
     
