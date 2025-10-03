@@ -5,7 +5,8 @@ from sqlalchemy.orm import sessionmaker
 
 SQLITE:str = r"sqlite:///.\fast_task.db" 
 POSTGRESQL:str=r"postgresql://postgres:password@localhost/todo"
-SELECTED_DB : str = POSTGRESQL
+MYSQL:str = r"mysql+pymysql://root:@localhost/todo"
+SELECTED_DB : str = MYSQL
 
 engine = create_engine(SELECTED_DB , connect_args={'check_same_thread':False} if SELECTED_DB == SQLITE else {} ) # type: ignore
 
