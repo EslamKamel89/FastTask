@@ -17,6 +17,7 @@ class User(Base) :
     last_name = Column(String)
     is_active = Column(Boolean , default=True)
     role = Column(String)
+    phone_number = Column(String , nullable=True)
 
 class UserBase(BaseModel) :
     username:str = Field(min_length=3 , max_length=255)
@@ -25,6 +26,7 @@ class UserBase(BaseModel) :
     last_name:str = Field(min_length=3 , max_length=255)
     is_active:bool = False
     role:str = Field(min_length=3 , max_length=255)
+    phone_number :str|None 
 
 class UserRead(UserBase) :
     id : int
