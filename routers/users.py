@@ -34,3 +34,19 @@ async def change_password(
     db.add(user_model)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+class PhoneRequest(BaseModel) :
+    phone_number:str =Field(min_length=6 , max_length=20)
+    
+@router.put('/phone-number' , status_code=status.HTTP_204_NO_CONTENT)
+async def change_phone_number(
+    user:user_dependency , 
+    db : db_dependency , 
+    body:PhoneRequest
+):
+    user_model = db.query(User).filter(User.id == user.user_id).first()
+    if user_model is None: # type: ignore
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED , detail="Authentication Failed")
+    user_model.phone_number = body.phone_number # type: ignore
+    db.add(user_model)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
