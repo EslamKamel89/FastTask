@@ -1,9 +1,11 @@
+from fastapi import status
+from fastapi.testclient import TestClient
 from sqlalchemy import StaticPool, create_engine
 from sqlalchemy.orm import sessionmaker
 
 from database import Base
 from main import app
-from security import get_db
+from security import CurrentUser, get_current_user, get_db
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./testdb.db"
 engine = create_engine(
@@ -20,5 +22,16 @@ def override_get_db():
         yield db
     finally:
         db.close()
+
+def override_get_current_user()->CurrentUser:
+    return CurrentUser(username='eslam' , user_id=1 , role='admin')
         
 app.dependency_overrides[get_db] = override_get_db
+app.dependency_overrides[get_current_user] = override_get_current_user
+
+client = TestClient(app)
+
+def test_read_all_authenticated():
+    response = client.get('/todos')
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == []
