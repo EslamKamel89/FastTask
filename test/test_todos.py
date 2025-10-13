@@ -67,13 +67,30 @@ def test_read_one_authenticated(test_todo: Generator[Todo]):
     response = client.get('/todos/1')
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {
-           'complete': False,
-           'description': 'test description',
            'id': 1,
-           'priority': 5,
            'title': 'test title',
+           'description': 'test description',
+           'priority': 5,
+           'complete': False,
        }
 def test_read_one_authenticated_not_found(test_todo:Generator[Todo]):
     response = client.get('/todos/2')
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {"detail" : 'No todo with id: 2 exist'}
+    
+def test_create_todo(test_todo:Generator[Todo]):
+    request_data : dict[str , str|int] = {
+        'id': 2,
+        'title': 'test title 2',
+        'description': 'test description 2',
+        'priority': 4,
+        'complete': False,
+    }
+    response = client.post('/todos' , json=request_data)
+    assert response.status_code == status.HTTP_201_CREATED
+    db = TestingSessionLocal()
+    new_todo = db.query(Todo).filter(Todo.id == 2).first()
+    assert new_todo.title == request_data.get('title') # type: ignore
+    assert new_todo.description == request_data.get('description') # type: ignore
+    assert new_todo.priority == request_data.get('priority') # type: ignore
+    assert new_todo.complete == request_data.get('complete') # type: ignore
