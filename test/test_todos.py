@@ -94,3 +94,27 @@ def test_create_todo(test_todo:Generator[Todo]):
     assert new_todo.description == request_data.get('description') # type: ignore
     assert new_todo.priority == request_data.get('priority') # type: ignore
     assert new_todo.complete == request_data.get('complete') # type: ignore
+    
+def test_update_todo(test_todo:Generator[Todo]) :
+    request_data: dict[str , str|int] = {
+           'title': 'test title updated',
+           'description': 'test description updated',
+           'priority': 3,
+           'complete': True,
+       }
+    response = client.put('/todos/1' , json=request_data)
+    assert response.status_code == status.HTTP_201_CREATED
+    db = TestingSessionLocal()
+    updated_todo = db.query(Todo).filter(Todo.id == 1).first()
+    assert updated_todo.title == request_data.get('title') # type: ignore
+    assert updated_todo.description == request_data.get('description') # type: ignore
+    assert updated_todo.priority == request_data.get('priority') # type: ignore
+    assert updated_todo.complete == request_data.get('complete') # type: ignore
+    
+def test_delete_todo(test_todo:Generator[Todo]) :
+    response = client.delete('/todos/1')
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    db = TestingSessionLocal()
+    todos = db.query(Todo).all()
+    assert todos == []
+    
