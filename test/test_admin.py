@@ -24,6 +24,6 @@ def test_admin_delete_todos(test_todo:Generator[Todo]) :
     todos = db.query(Todo).all()
     assert todos == []
     
-def test_admin_delete_todos_not_fouond():
+def test_admin_delete_todos_not_found():
     response = client.delete('/admins/todo/2')
     assert response.status_code == status.HTTP_404_NOT_FOUND

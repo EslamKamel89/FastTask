@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, Response, status
 from pydantic import BaseModel, Field
 
 from models import User, UserRead
-from security import db_dependency, user_dependency
+from security import bcrypt_context, db_dependency, user_dependency
 
 router = APIRouter(prefix='/users' , tags=['users'])
 
