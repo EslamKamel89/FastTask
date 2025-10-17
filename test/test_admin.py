@@ -16,3 +16,14 @@ def test_admin_read_all_authenticated(test_todo: Generator[Todo]):
         "priority":5,
         "complete": False , 
     }]
+    
+def test_admin_delete_todos(test_todo:Generator[Todo]) :
+    response = client.delete('/admin/todos/1')
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+    db = TestingSessionLocal()
+    todos = db.query(Todo).all()
+    assert todos == []
+    
+def test_admin_delete_todos_not_fouond():
+    response = client.delete('/admins/todo/2')
+    assert response.status_code == status.HTTP_404_NOT_FOUND
