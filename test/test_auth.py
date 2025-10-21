@@ -3,7 +3,7 @@ from test.utils import *
 from typing import Any, Generator
 
 import pytest
-from fastapi import status  # type: ignore
+from fastapi import HTTPException, status  # type: ignore
 from jose import jwt
 
 from models import Todo, User  # type: ignore
@@ -36,3 +36,11 @@ async def test_get_current_user_valid_token():
     assert user.user_id == 1
     assert user.username == 'eslam'
     assert user.role == 'admin' 
+
+@pytest.mark.asyncio
+async def test_get_current_user_missing_payload():
+    encode:dict[str ,Any] = {'role':'user'}
+    token:str = jwt.encode(encode , SECRET_KEY , algorithm= ALGORITHM)
+    with pytest.raises(HTTPException) as excinfo:
+        await get_current_user(token)
+    assert excinfo.value.status_code == status.HTTP_401_UNAUTHORIZED    
