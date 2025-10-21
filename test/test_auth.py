@@ -1,8 +1,9 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from test.utils import *
-from typing import Generator
+from typing import Any, Generator
 
-from fastapi import status
+import pytest
+from fastapi import status  # type: ignore
 from jose import jwt
 
 from models import Todo, User  # type: ignore
@@ -25,3 +26,13 @@ def test_create_access_token(test_user:Generator[User]) :
     assert test_user.username == payload.get('sub') # type: ignore
     assert test_user.id == payload.get('id') # type: ignore
     assert test_user.role == payload.get('role') # type: ignore
+
+
+@pytest.mark.asyncio
+async def test_get_current_user_valid_token():
+    encode: dict[str, Any] = {"sub":'eslam' ,'id':1 , 'role':'admin' , "exp" : datetime.now() + timedelta(days=1) }
+    token:str = jwt.encode(encode , SECRET_KEY ,algorithm= ALGORITHM)
+    user = await get_current_user(token)
+    assert user.user_id == 1
+    assert user.username == 'eslam'
+    assert user.role == 'admin' 
