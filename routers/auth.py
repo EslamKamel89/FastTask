@@ -1,16 +1,22 @@
 from datetime import timedelta
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+import main as m
 from models import User, UserCreate, UserRead
 from security import bcrypt_context, create_access_token, db_dependency
 
 router = APIRouter(prefix='/auth' , tags=['auth'])
+### PAGES ###
+@router.get('/login-page')
+async def render_login_page(request:Request):
+    return m.templates.TemplateResponse('login.html' ,{'request':request})
 
+### API ###
 @router.post('/' , status_code=status.HTTP_201_CREATED , response_model=UserRead )
 async def create_user(db:db_dependency , user_request:UserCreate) :
     user = User(

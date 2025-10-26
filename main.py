@@ -22,6 +22,7 @@ async def home(request:Request) :
         "request" : request,
     })
 
+
 app.include_router(auth.router)
 app.include_router(todos.router)
 app.include_router(admin.router)
