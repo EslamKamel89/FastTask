@@ -1,4 +1,4 @@
-{% include 'layout.html' %}
+{% extends 'layout.html' %} {% block content %}
 <div class="container">
   <div class="card">
     <div class="card-header">Login to your account</div>
@@ -28,7 +28,8 @@
       </form>
     </div>
     <div class="card-footer text-muted">
-      <a href="/auth/register-page">Register?</a>
+      <a href="/auth/register-page">Don't have an account?</a>
     </div>
   </div>
 </div>
+{% endblock %}
