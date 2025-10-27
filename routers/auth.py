@@ -15,7 +15,9 @@ router = APIRouter(prefix='/auth' , tags=['auth'])
 @router.get('/login-page')
 async def render_login_page(request:Request):
     return m.templates.TemplateResponse('login.html' ,{'request':request})
-
+@router.get('/register-page')
+async def render_register_page(request:Request) :
+    return m.templates.TemplateResponse('register.html' , {'request':request})
 ### API ###
 @router.post('/' , status_code=status.HTTP_201_CREATED , response_model=UserRead )
 async def create_user(db:db_dependency , user_request:UserCreate) :
