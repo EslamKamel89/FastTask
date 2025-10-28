@@ -8,6 +8,9 @@ from security import db_dependency, user_dependency
 
 router = APIRouter(prefix='/todos' , tags=['todos']) 
 
+@router.get('/todo-page')
+async def render_todos_page():
+    return {'message':"hello world"}
 
 @router.get('/' , status_code=status.HTTP_200_OK , response_model=list[TodoRead]) 
 async def all_todos(user: user_dependency , db:db_dependency):
