@@ -1,17 +1,26 @@
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Path, Response, status
+from fastapi import APIRouter, HTTPException, Path, Request, Response, status
 from sqlalchemy.exc import SQLAlchemyError
 
+import main as m
 from models import Todo, TodoCreate, TodoRead
-from security import db_dependency, user_dependency
+from security import (db_dependency, get_current_user, redirect_to_login,
+                      user_dependency)
 
 router = APIRouter(prefix='/todos' , tags=['todos']) 
-
+### PAGES ###
 @router.get('/todo-page')
-async def render_todos_page():
-    return {'message':"hello world"}
+async def render_todos_page(db:db_dependency ,request:Request):
+    try:
+        user = await get_current_user(request.cookies.get('access_token')) # type: ignore
+        todos = db.query(Todo).filter(Todo.owner_id == user.user_id).all()
+        return m.templates.TemplateResponse('todo.html' , {"request":request , 'todos':todos , "user":user})
+    except Exception:
+        return redirect_to_login()
+    
 
+### API ###
 @router.get('/' , status_code=status.HTTP_200_OK , response_model=list[TodoRead]) 
 async def all_todos(user: user_dependency , db:db_dependency):
     if user is None : # type: ignore

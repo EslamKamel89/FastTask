@@ -7,6 +7,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from starlette.responses import RedirectResponse
 
 from database import SessionLocal
 
@@ -49,9 +50,12 @@ def admin_required(user: CurrentUser = Depends(get_current_user)) ->CurrentUser 
     return user
 
 
-
 db_dependency = Annotated[Session , Depends(get_db)]
 user_dependency= Annotated[CurrentUser , Depends(get_current_user)]
 bcrypt_context= CryptContext(schemes=['bcrypt'])
 admin_dependency = Annotated[CurrentUser, Depends(admin_required)]
 
+def redirect_to_login()->RedirectResponse:
+    redirect_response = RedirectResponse('/auth/login-page')
+    redirect_response.delete_cookie('access_token')
+    return redirect_response

@@ -1,0 +1,96 @@
+{% extends 'layout.html' %} {% block content %}
+<div class="container py-4">
+  <div class="card border-0 shadow-lg rounded-4">
+    <div class="card-header bg-white border-0 py-3">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <h4 class="mb-0">Your Todos</h4>
+          <small class="text-muted">Track and refine what matters</small>
+        </div>
+        <a href="add-todo-page" class="btn btn-primary">
+          <i class="bi bi-plus-circle me-1"></i> Add Todo
+        </a>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body py-3">
+          <div class="row align-items-center g-3">
+            <div class="col-md-8">
+              <h5 class="card-title mb-1">List of all your todos</h5>
+              <p class="card-text text-muted mb-0">
+                Information regarding stuff that needs to be completed
+              </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+              <a href="add-todo-page" class="btn btn-outline-primary">
+                <i class="bi bi-plus-lg me-1"></i> Add Todo
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover table-borderless align-middle">
+          <thead class="table-light">
+            <tr>
+              <th scope="col" style="width: 72px">#</th>
+              <th scope="col">Info</th>
+              <th scope="col" class="text-end" style="width: 160px">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for todo in todos %} {% if todo.complete == False %}
+            <tr class="pointer">
+              <td class="fw-semibold text-muted">{{ todo.id }}</td>
+              <td>
+                <div class="fw-semibold">{{ todo.title }}</div>
+                <small class="text-muted d-block">{{ todo.description }}</small>
+                <span
+                  class="badge bg-warning-subtle text-warning-emphasis mt-2"
+                >
+                  <i class="bi bi-hourglass-split me-1"></i> Pending
+                </span>
+              </td>
+              <td class="text-end">
+                <button
+                  onclick="window.location.href = 'edit-todo-page/{{ todo.id }}'"
+                  type="button"
+                  class="btn btn-sm btn-outline-info"
+                >
+                  <i class="bi bi-pencil-square me-1"></i> Edit
+                </button>
+              </td>
+            </tr>
+            {% else %}
+            <tr class="pointer table-success">
+              <td class="fw-semibold text-muted">{{ todo.id }}</td>
+              <td class="strike-through-tod">
+                <div class="fw-semibold">{{ todo.title }}</div>
+                <small class="text-muted d-block">{{ todo.description }}</small>
+                <span
+                  class="badge bg-success-subtle text-success-emphasis mt-2"
+                >
+                  <i class="bi bi-check-circle me-1"></i> Completed
+                </span>
+              </td>
+              <td class="text-end">
+                <button
+                  onclick="window.location.href = 'edit-todo-page/{{ todo.id }}'"
+                  type="button"
+                  class="btn btn-sm btn-outline-info"
+                >
+                  <i class="bi bi-pencil-square me-1"></i> Edit
+                </button>
+              </td>
+            </tr>
+            {% endif %} {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
