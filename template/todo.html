@@ -4,7 +4,7 @@
     <div class="card-header bg-white border-0 py-3">
       <div class="d-flex align-items-center justify-content-between">
         <div>
-          <h4 class="mb-0">Your Todos</h4>
+          <h4 class="mb-0">Welcome {{ user.username.capitalize() }}</h4>
           <small class="text-muted">Track and refine what matters</small>
         </div>
         <a href="add-todo-page" class="btn btn-primary">
@@ -22,11 +22,6 @@
               <p class="card-text text-muted mb-0">
                 Information regarding stuff that needs to be completed
               </p>
-            </div>
-            <div class="col-md-4 text-md-end">
-              <a href="add-todo-page" class="btn btn-outline-primary">
-                <i class="bi bi-plus-lg me-1"></i> Add Todo
-              </a>
             </div>
           </div>
         </div>
