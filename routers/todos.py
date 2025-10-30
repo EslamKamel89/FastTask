@@ -19,6 +19,14 @@ async def render_todos_page(db:db_dependency ,request:Request):
     except Exception:
         return redirect_to_login()
     
+@router.get('/add-todo-page')
+async def render_add_todo(request:Request):
+    try:
+        user = await  get_current_user(request.cookies.get('access_token')) # type: ignore
+        return m.templates.TemplateResponse('add-todo.html' , {"request":request , "user":user})
+    except Exception : 
+        return redirect_to_login()
+    
 
 ### API ###
 @router.get('/' , status_code=status.HTTP_200_OK , response_model=list[TodoRead]) 
