@@ -37,8 +37,8 @@
             </tr>
           </thead>
           <tbody>
-            {% for todo in todos %} {% if todo.complete == False %}
-            <tr class="pointer">
+            {% for todo in todos %}
+            <tr class="pointer {{ 'table-success' if todo.complete else '' }}">
               <td class="fw-semibold text-muted">{{ todo.id }}</td>
               <td>
                 <div class="fw-semibold">{{ todo.title }}</div>
@@ -55,33 +55,18 @@
                   type="button"
                   class="btn btn-sm btn-outline-info"
                 >
-                  <i class="bi bi-pencil-square me-1"></i> Edit
+                  <i class="bi bi-pen"></i>
                 </button>
-              </td>
-            </tr>
-            {% else %}
-            <tr class="pointer table-success">
-              <td class="fw-semibold text-muted">{{ todo.id }}</td>
-              <td class="strike-through-tod">
-                <div class="fw-semibold">{{ todo.title }}</div>
-                <small class="text-muted d-block">{{ todo.description }}</small>
-                <span
-                  class="badge bg-success-subtle text-success-emphasis mt-2"
-                >
-                  <i class="bi bi-check-circle me-1"></i> Completed
-                </span>
-              </td>
-              <td class="text-end">
                 <button
                   onclick="window.location.href = 'edit-todo-page/{{ todo.id }}'"
                   type="button"
-                  class="btn btn-sm btn-outline-info"
+                  class="btn btn-sm btn-danger btn-outline-info text-white"
                 >
-                  <i class="bi bi-pencil-square me-1"></i> Edit
+                  <i class="bi bi-trash"></i>
                 </button>
               </td>
             </tr>
-            {% endif %} {% endfor %}
+            {% endfor %}
           </tbody>
         </table>
       </div>
