@@ -26,7 +26,24 @@ async def render_add_todo(request:Request):
         return m.templates.TemplateResponse('add-todo.html' , {"request":request , "user":user})
     except Exception : 
         return redirect_to_login()
-    
+
+@router.get('/edit-todo-page/{todo_id}')
+async def render_edit_todo(
+    request:Request , 
+    todo_id:Annotated[int , Path(ge=1) ], 
+    db: db_dependency) :
+    try:
+        token:str|None = request.cookies.get('access_token')
+        if(token is None) :
+            return redirect_to_login()
+        user  = await get_current_user(token)
+        todo =db.query(Todo).filter(Todo.id == todo_id).first()
+        if(todo is None) :
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail="There are no todo with this id")
+        return m.templates.TemplateResponse('edit-todo.html' ,{'request': request , 'user':user , 'todo' : todo}) 
+        
+    except Exception:
+        return redirect_to_login()
 
 ### API ###
 @router.get('/' , status_code=status.HTTP_200_OK , response_model=list[TodoRead]) 
