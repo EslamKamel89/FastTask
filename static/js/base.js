@@ -91,6 +91,8 @@ if (editTodoForm) {
   document
     .getElementById("deleteButton")
     .addEventListener("click", async function () {
+      // let confirmed = confirm("are you sure you want to delete this todo");
+      // if (!confirmed) return;
       var url = window.location.pathname;
       const todoId = url.substring(url.lastIndexOf("/") + 1);
 
