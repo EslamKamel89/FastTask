@@ -1,5 +1,6 @@
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, status
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -17,10 +18,8 @@ async def health_check():
     return {"status":"Healthy"}
 
 @app.get('/')
-async def home(request:Request) :
-    return templates.TemplateResponse("home.html" , {
-        "request" : request,
-    })
+async def home(request:Request  ) :
+    return RedirectResponse('/todos/todo-page' , status_code=status.HTTP_302_FOUND )
 
 
 app.include_router(auth.router)
